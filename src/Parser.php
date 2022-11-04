@@ -3,6 +3,7 @@
 namespace Majkel\Pseudokod;
 
 use Majkel\Pseudokod\Nodes;
+use Majkel\Pseudokod\Nodes\VariableNode;
 use ParseError;
 
 class Parser
@@ -32,6 +33,8 @@ class Parser
         if ($this->tokens->nextNonWhite()->kind !== TokenKind::CurlyOpen) {
             throw new ParseError('Expected {');
         }
+        $this->tokens->nextNonWhite();
+
         $code = $this->parseBlock();
 
         return new Nodes\AlgorithmNode(
@@ -86,17 +89,24 @@ class Parser
         return $result;
     }
 
-    public function parseStatement()
+    public function parseStatement(): null|object
     {
-
+        return 
+            $this->parseSet()
+            ?? $this->parseSwap()
+        ;
     }
 
     public function parseBlock()
     {
         $result = [];
-        while ($this->tokens->next()->kind !== TokenKind::CurlyClose) {
-            $result[] = $this->parseExpression(); 
+        while ($this->tokens->peekNonWhite()->kind !== TokenKind::CurlyClose) {
+            $result[] = 
+                $this->parseStatement()
+                ?? $this->parseExpression()
+            ; 
         }
+        $this->tokens->nextNonWhite();
         return $result;
     }
 
@@ -111,29 +121,117 @@ class Parser
                     break;
                 case TokenKind::Math:
                     $operator = $this->tokens->curent()->content;
-                    if (in_array($operator, ['/', '*'])) {
-                        $numbers->push(new Nodes\MathNode(
-                            $numbers->pop() ?? throw new ParseError('Unexpected '.$operator),
-                            $operators->pop() ?? throw new ParseError('Unexpected '.$operator),
-                            $numbers->pop() ?? throw new ParseError('Unexpected '.$operator),
-                        ));
+                    if (in_array($operators->top(), ['/', '*'])) {
+                        self::infix($numbers, $operator, Nodes\MathNode::class);
                     }
                     $operators->push($operator);
                     break;
                 case TokenKind::Open:
+                    $operators->push('(');
                     break;
+                case TokenKind::Close:
+                    $group = [];
+                    while (($operator = $operators->pop()) !== '(') {
+                        if (is_null($operator)) {
+                            throw new ParseError('Unexpected )');
+                        }
 
+                        if ($operator === ',') {
+                            $group[] = $numbers->pop();
+                            continue;
+                        }
+                        self::infix($numbers, $operator, Nodes\MathNode::class);
+                    }
+                    $group[] = $numbers->pop();
+                    $numbers->push($numbers->top() instanceof VariableNode
+                        ? new Nodes\FunctionNode($numbers->pop()->name, array_reverse($group))
+                        : $group[0]
+                    );
+                    break;
+                case TokenKind::Name:
+                    $numbers->push($this->parseVariable());
+                    break;
+                case TokenKind::Comma:
+                    $operators->push(',');
+                    break;
+                default:
+                    print_r($this->tokens->curent());
+                    throw new ParseError('Unexpected token');
             }
         }
 
         while (($operator = $operators->pop()) !== null) {
-            $numbers->push(new Nodes\MathNode(
-                $numbers->pop() ?? throw new ParseError('Unexpected '.$operator),
-                $operator,
-                $numbers->pop() ?? throw new ParseError('Unexpected '.$operator),
-            ));
+            if (!in_array($operator, ['+', '-', '*', '/'])) {
+                throw new ParseError('Unexpected token');
+            }
+            self::infix($numbers, $operator, Nodes\MathNode::class);
+        }
+        
+        return $numbers->top();
+    }
+
+    public function parseVariable(): VariableNode
+    {
+        if ($this->tokens->curent()->kind !== TokenKind::Name) {
+            throw new ParseError('Expected variable');
         }
 
-        return $numbers->top();
+        $array_access = null;
+        $name = $this->tokens->curent()->content;
+        if ($this->tokens->peekNonWhite()->kind === TokenKind::SquareOpen) {
+            $this->tokens->nextNonWhite();
+            $array_access = $this->parseExpression(TokenKind::SquareClose);
+        }
+
+        return new VariableNode($name, $array_access);
+    }
+
+    public function parseSet(): null|Nodes\SetNode
+    {
+        if ($this->tokens->peekNonWhite()->kind !== TokenKind::Name) {
+            return null;
+        }
+
+        $pointer = $this->tokens->pointer;
+        $this->tokens->nextNonWhite();
+        $variable = $this->parseVariable();
+        if ($this->tokens->peekNonWhite()->kind !== TokenKind::Set) {
+            $this->tokens->pointer = $pointer;
+            return null;
+        }
+        $this->tokens->nextNonWhite();
+        $expression = $this->parseExpression();
+    
+        return new Nodes\SetNode($variable, $expression);
+    }
+
+    public function parseSwap(): null|Nodes\SwapNode
+    {
+        if ($this->tokens->peekNonWhite()->kind !== TokenKind::Name) {
+            return null;
+        }
+        
+        $pointer = $this->tokens->pointer;
+        $this->tokens->nextNonWhite();
+        $variable = $this->parseVariable();
+        if ($this->tokens->peekNonWhite()->kind !== TokenKind::Swap) {
+            $this->tokens->pointer = $pointer;
+            return null;
+        }
+        $this->tokens->nextNonWhite(3);
+        $swap = $this->parseVariable(); 
+        $this->tokens->nextNonWhite();
+        return new Nodes\SwapNode($variable, $swap);       
+    }
+
+    private static function infix(Stack $stack, string $operator, string $class): void
+    {
+        $second = $stack->pop() ?? throw new ParseError('Unexpected '.$operator);
+        $first = $stack->pop() ?? throw new ParseError('Unexpected '.$operator);
+        $stack->push(new $class(
+            $first,
+            $operator,
+            $second,
+        ));       
     }
 }

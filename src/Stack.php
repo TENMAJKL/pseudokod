@@ -19,6 +19,6 @@ class Stack
 
     public function top(): mixed
     {
-        return $this->data[count($this->data) - 1];
+        return $this->data[count($this->data) - 1] ?? null;
     }
 }

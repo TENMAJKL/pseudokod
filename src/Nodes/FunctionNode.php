@@ -2,11 +2,11 @@
 
 namespace Majkel\Pseudokod\Nodes;
 
-class VariableNode implements ExpressionNode
+class FunctionNode implements ExpressionNode
 {
     public function __construct(
         public readonly string $name,
-        public readonly ?ExpressionNode $array_access = null
+        public readonly array $arguments,
     ) {
 
     }

@@ -4,7 +4,7 @@ namespace Majkel\Pseudokod;
 
 class TokenStream
 {
-    private int $pointer = -1;
+    public int $pointer = -1;
 
     public function __construct(
         /** @var array<Token> $tokens */
@@ -18,18 +18,18 @@ class TokenStream
         return $this->tokens[$this->pointer];
     }
 
-    public function next(): Token 
+    public function next(int $pos = 1): Token 
     {
-        $this->pointer++;
+        $this->pointer += $pos;
         return $this->curent();
     }
 
-    public function peek(int $pos): Token
+    public function peek(int $pos = 1): ?Token
     {
-        return $this->tokens[$this->pointer + $pos];
+        return $this->tokens[$this->pointer + $pos] ?? null;
     }
 
-    public function peekNonWhite(int $pos): Token
+    public function peekNonWhite(int $pos = 1): ?Token
     {
         $token = $this->peek($pos);
         if ($token->kind !== TokenKind::Space) {
@@ -39,9 +39,9 @@ class TokenStream
         return $this->peek($pos > 0 ? $pos + 1 : $pos - 1);
     }
 
-    public function nextNonWhite(): Token 
+    public function nextNonWhite(int $pos = 1): Token 
     {
-        if ($this->next()->kind !== TokenKind::Space) {
+        if ($this->next($pos)->kind !== TokenKind::Space) {
             return $this->curent();
         }
 

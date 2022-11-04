@@ -15,7 +15,7 @@ class Lexer
         |(?<WHILE>while)
         |(?<SET><-)
         |(?<UNARY>(\+\+|--))
-        |(?<COMMENT>//.+)
+        |(?<COMMENT>//[^\n]+)
         |(?<MATH>(\+|-|\*|/|%))
         |(?<LOGIC>(AND|OR))
         |(?<COMPARE>(<|>|<=|>=|=))
