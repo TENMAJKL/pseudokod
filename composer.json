@@ -1,0 +1,16 @@
+{
+    "name": "majkel/pseudokod",
+    "type": "language",
+    "autoload": {
+        "psr-4": {
+            "Majkel\\Pseudokod\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "TENMAJKL",
+            "email": "silder.hologram@gmail.com"
+        }
+    ],
+    "require": {}
+}
