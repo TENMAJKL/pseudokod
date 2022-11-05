@@ -32,7 +32,7 @@ class TokenStream
     public function peekNonWhite(int $pos = 1): ?Token
     {
         $token = $this->peek($pos);
-        if ($token->kind !== TokenKind::Space) {
+        if (!in_array($token->kind, [TokenKind::Space, TokenKind::Comment])) {
             return $token;
         }
 
@@ -41,10 +41,10 @@ class TokenStream
 
     public function nextNonWhite(int $pos = 1): Token 
     {
-        if ($this->next($pos)->kind !== TokenKind::Space) {
+        if (!in_array($this->next($pos)->kind, [TokenKind::Space, TokenKind::Comment])) {
             return $this->curent();
         }
 
-        return $this->next();
+        return $this->nextNonWhite();
     } 
 }

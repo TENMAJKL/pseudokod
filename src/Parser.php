@@ -34,7 +34,6 @@ class Parser
             throw new ParseError('Expected {');
         }
         $this->tokens->nextNonWhite();
-
         $code = $this->parseBlock();
 
         return new Nodes\AlgorithmNode(
@@ -94,6 +93,8 @@ class Parser
         return 
             $this->parseSet()
             ?? $this->parseSwap()
+            ?? $this->parseIf()
+            ?? $this->parseExpression()
         ;
     }
 
@@ -101,16 +102,13 @@ class Parser
     {
         $result = [];
         while ($this->tokens->peekNonWhite()->kind !== TokenKind::CurlyClose) {
-            $result[] = 
-                $this->parseStatement()
-                ?? $this->parseExpression()
-            ; 
+            $result[] = $this->parseStatement();
         }
         $this->tokens->nextNonWhite();
         return $result;
     }
 
-    public function parseExpression($end = TokenKind::NewLine): Nodes\ExpressionNode
+    public function parseExpression($end = TokenKind::NewLine): null|Nodes\ExpressionNode
     {
         $numbers = new Stack();
         $operators = new Stack();
@@ -119,10 +117,17 @@ class Parser
                 case TokenKind::Number:
                     $numbers->push(new Nodes\NumberNode($this->tokens->curent()->content));
                     break;
+                case TokenKind::Compare:
                 case TokenKind::Math:
                     $operator = $this->tokens->curent()->content;
                     if (in_array($operators->top(), ['/', '*'])) {
                         self::infix($numbers, $operator, Nodes\MathNode::class);
+                    }
+                    // at this point, I have no idea whats going on
+                    if (in_array($operator, ['<', '>', '<=', '>=', '==', '!='])) {
+                        if (in_array($operators->top(), ['/', '*', '+', '-'])) {
+                            self::infix($numbers, $operators->pop(), Nodes\CompareNode::class);
+                        }
                     }
                     $operators->push($operator);
                     break;
@@ -161,12 +166,12 @@ class Parser
         }
 
         while (($operator = $operators->pop()) !== null) {
-            if (!in_array($operator, ['+', '-', '*', '/'])) {
+            if (!in_array($operator, ['+', '-', '*', '/', '<', '>', '<=', '>=', '==', '!='])) {
                 throw new ParseError('Unexpected token');
             }
             self::infix($numbers, $operator, Nodes\MathNode::class);
         }
-        
+
         return $numbers->top();
     }
 
@@ -222,6 +227,37 @@ class Parser
         $swap = $this->parseVariable(); 
         $this->tokens->nextNonWhite();
         return new Nodes\SwapNode($variable, $swap);       
+    }
+
+    public function parseIf(): null|Nodes\IfNode
+    {
+        if ($this->tokens->peekNonWhite()->kind !== TokenKind::If) {
+            return null;
+        }
+
+        $this->tokens->nextNonWhite();
+        if ($this->tokens->nextNonWhite()->kind !== TokenKind::Open) {
+            throw new ParseError('Expected ( after if');
+        }
+
+        $condition = $this->parseExpression(TokenKind::Close);
+
+        if ($this->tokens->peekNonWhite()->kind === TokenKind::CurlyOpen) {
+            $this->tokens->nextNonWhite();
+            if ($this->tokens->peekNonWhite()->kind === TokenKind::NewLine) {
+                $this->tokens->nextNonWhite();
+            }
+
+            $code = $this->parseBlock();
+            $this->tokens->nextNonWhite();
+        } else {
+            if ($this->tokens->peekNonWhite()->kind === TokenKind::NewLine) {
+                $this->tokens->nextNonWhite();
+            }
+            $code = [$this->parseStatement()];
+        }
+
+        return new Nodes\IfNode($condition, $code);
     }
 
     private static function infix(Stack $stack, string $operator, string $class): void

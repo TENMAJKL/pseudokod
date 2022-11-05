@@ -32,6 +32,7 @@ enum TokenKind
     case CurlyClose;
     case SquareOpen;
     case SquareClose;
+    case Comment;
 
     public static function fromRe(string $re): self
     {
@@ -62,6 +63,7 @@ enum TokenKind
             'CURLY_CLOSE' => self::CurlyClose,
             'SQUARE_OPEN' => self::SquareOpen,
             'SQUARE_CLOSE' => self::SquareClose,
+            'COMMENT' => self::Comment,
             'ERROR' => throw new ParseError('Unexpected token'),
         };
     }
@@ -93,8 +95,9 @@ enum TokenKind
             self::Close => 'CLOSE',
             self::CurlyOpen => 'CURLY_OPEN',
             self::CurlyClose => 'CURLY_CLOSE',
-            self::SquareOpen => 'SQUAR_EOPEN',
+            self::SquareOpen => 'SQUARE_OPEN',
             self::SquareClose => 'SQUARE_CLOSE',
+            self::Comment => 'COMMENT',
         };
     }
 }

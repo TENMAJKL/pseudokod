@@ -18,7 +18,7 @@ class Lexer
         |(?<COMMENT>//[^\n]+)
         |(?<MATH>(\+|-|\*|/|%))
         |(?<LOGIC>(AND|OR))
-        |(?<COMPARE>(<|>|<=|>=|=))
+        |(?<COMPARE>(<|>|<=|>=|==|!=))
         |(?<COLON>\:)
         |(?<COMMA>\,)
         |(?<SEMICOLON>;)
