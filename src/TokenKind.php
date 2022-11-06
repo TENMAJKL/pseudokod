@@ -13,6 +13,7 @@ enum TokenKind
     case In;
     case Out;
     case If;
+    case Else;
     case While;
     case Set;
     case Unary;
@@ -44,6 +45,7 @@ enum TokenKind
             'IN' => self::In,
             'OUT' => self::Out,
             'IF' => self::If,
+            'ELSE' => self::Else,
             'WHILE' => self::While,
             'SET' => self::Set,
             'UNARY' => self::Unary,
@@ -78,6 +80,7 @@ enum TokenKind
             self::In => 'IN',
             self::Out => 'OUT',
             self::If => 'IF',
+            self::Else => 'ELSE',
             self::While => 'WHILE',
             self::Set => 'SET',
             self::Unary => 'UNARY',

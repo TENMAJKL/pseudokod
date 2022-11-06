@@ -241,7 +241,44 @@ class Parser
         }
 
         $condition = $this->parseExpression(TokenKind::Close);
+        $code = $this->parseBody();
 
+        $else_ifs = [];
+        $else = [];
+
+        while ($this->tokens->curent()->kind == TokenKind::Else) {
+            if ($else_if = $this->parseIf()) {
+                $else_ifs[] = $else_if;
+            } else {
+                if (!empty($else)) {
+                    throw new ParseError('If can have only 1 else');
+                }
+                $else = $this->parseBody();
+            }
+        }
+
+        return new Nodes\IfNode($condition, $code, $else_ifs, $else);
+    }
+
+    public function parseWhile(): null|Nodes\WhileNode
+    {
+        if ($this->tokens->peekNonWhite()->kind !== TokenKind::While) {
+            return null;
+        }
+
+        $this->tokens->nextNonWhite();
+        if ($this->tokens->nextNonWhite()->kind !== TokenKind::Open) {
+            throw new ParseError('Expected ( after while');
+        }
+
+        $condition = $this->parseExpression(TokenKind::Close);
+        $code = $this->parseBody();
+
+        return new Nodes\WhileNode($condition, $code);
+    }
+
+    public function parseBody(): array
+    {
         if ($this->tokens->peekNonWhite()->kind === TokenKind::CurlyOpen) {
             $this->tokens->nextNonWhite();
             if ($this->tokens->peekNonWhite()->kind === TokenKind::NewLine) {
@@ -250,14 +287,13 @@ class Parser
 
             $code = $this->parseBlock();
             $this->tokens->nextNonWhite();
-        } else {
-            if ($this->tokens->peekNonWhite()->kind === TokenKind::NewLine) {
-                $this->tokens->nextNonWhite();
-            }
-            $code = [$this->parseStatement()];
+            return $code;
         }
 
-        return new Nodes\IfNode($condition, $code);
+        if ($this->tokens->peekNonWhite()->kind === TokenKind::NewLine) {
+            $this->tokens->nextNonWhite();
+        }
+        return [$this->parseStatement()];
     }
 
     private static function infix(Stack $stack, string $operator, string $class): void

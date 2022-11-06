@@ -20,7 +20,11 @@ $tokens = $lexer->lex('algorithm Parek(out:cs,rizek,in:parek) {
         1 + 1
         if (1 < 2) {
             1 * 1
-        } 
+        } else if (1 == 2) {
+            18*2
+        } else {
+            1 /8
+        }
     }
     1+3 
 }');

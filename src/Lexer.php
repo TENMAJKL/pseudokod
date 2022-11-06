@@ -12,6 +12,7 @@ class Lexer
         |(?<IN>in)
         |(?<OUT>out)
         |(?<IF>if)
+        |(?<ELSE>else)
         |(?<WHILE>while)
         |(?<SET><-)
         |(?<UNARY>(\+\+|--))
@@ -37,12 +38,16 @@ class Lexer
 
     public function lex(string $code): TokenStream
     {
-        $result = preg_match_all('~'.trim(self::Re).'~xsA', $code, $matches, PREG_UNMATCHED_AS_NULL|PREG_SET_ORDER);
-
-        return new TokenStream(array_map(function($token) {
+        preg_match_all('~'.trim(self::Re).'~xsA', $code, $matches, PREG_UNMATCHED_AS_NULL|PREG_SET_ORDER);
+        $line = 0;
+        return new TokenStream(array_map(function($token) use(&$line) {
             $token = array_filter($token);
             $keys = array_keys($token);
-            return new Token(TokenKind::fromRe($keys[1]), $token[0]);
+            $result = new Token(TokenKind::fromRe($keys[1]), $token[0], $line);
+            if ($keys[1] === 'NEWLINE') {
+                $line++;
+            }
+            return $result;
         }, $matches));
     }
 }
