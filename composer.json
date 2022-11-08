@@ -12,5 +12,7 @@
             "email": "silder.hologram@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "friendsofphp/php-cs-fixer": "^3.13"
+    }
 }

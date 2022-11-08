@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod\Nodes;
 
 class SetNode implements Node
@@ -8,7 +10,6 @@ class SetNode implements Node
         public readonly VariableNode $variable,
         public readonly ExpressionNode $expression
     ) {
-
     }
 
     public function print(): string

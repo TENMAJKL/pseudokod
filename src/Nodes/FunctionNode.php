@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod\Nodes;
 
 class FunctionNode implements ExpressionNode
@@ -8,12 +10,12 @@ class FunctionNode implements ExpressionNode
         public readonly string $name,
         public readonly array $arguments,
     ) {
-
     }
 
     public function print(): string
     {
-        $args = implode(", ", array_map(fn(Node $item) => $item->print(), $this->arguments));
+        $args = implode(', ', array_map(fn (Node $item) => $item->print(), $this->arguments));
+
         return $this->name.'('.$args.')';
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod;
 
 class Token
@@ -9,6 +11,5 @@ class Token
         public readonly string $content,
         public readonly int $line
     ) {
-
     }
 }

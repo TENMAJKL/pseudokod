@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod;
 
 class TokenStream
@@ -10,7 +12,6 @@ class TokenStream
         /** @var array<Token> $tokens */
         public readonly array $tokens
     ) {
-
     }
 
     public function curent(): Token
@@ -18,9 +19,10 @@ class TokenStream
         return $this->tokens[$this->pointer];
     }
 
-    public function next(int $pos = 1): Token 
+    public function next(int $pos = 1): Token
     {
         $this->pointer += $pos;
+
         return $this->curent();
     }
 
@@ -39,12 +41,12 @@ class TokenStream
         return $this->peek($pos > 0 ? $pos + 1 : $pos - 1);
     }
 
-    public function nextNonWhite(int $pos = 1): Token 
+    public function nextNonWhite(int $pos = 1): Token
     {
         if (!in_array($this->next($pos)->kind, [TokenKind::Space, TokenKind::Comment])) {
             return $this->curent();
         }
 
         return $this->nextNonWhite();
-    } 
+    }
 }

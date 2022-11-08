@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod;
 
 class Stack
@@ -9,6 +11,7 @@ class Stack
     public function push(mixed $value): self
     {
         $this->data[] = $value;
+
         return $this;
     }
 

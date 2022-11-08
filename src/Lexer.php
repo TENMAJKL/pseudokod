@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod;
 
 class Lexer
@@ -38,15 +40,17 @@ class Lexer
 
     public function lex(string $code): TokenStream
     {
-        preg_match_all('~'.trim(self::Re).'~xsA', $code, $matches, PREG_UNMATCHED_AS_NULL|PREG_SET_ORDER);
+        preg_match_all('~'.trim(self::Re).'~xsA', $code, $matches, PREG_UNMATCHED_AS_NULL | PREG_SET_ORDER);
         $line = 0;
-        return new TokenStream(array_map(function($token) use(&$line) {
+
+        return new TokenStream(array_map(function ($token) use (&$line) {
             $token = array_filter($token);
             $keys = array_keys($token);
             $result = new Token(TokenKind::fromRe($keys[1]), $token[0], $line);
-            if ($keys[1] === 'NEWLINE') {
-                $line++;
+            if ('NEWLINE' === $keys[1]) {
+                ++$line;
             }
+
             return $result;
         }, $matches));
     }

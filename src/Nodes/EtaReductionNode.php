@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod\Nodes;
 
 class EtaReductionNode
@@ -8,7 +10,6 @@ class EtaReductionNode
         public readonly string $operator,
         public readonly ?NumberNode $number = null
     ) {
-
     }
 
     public function print(): string

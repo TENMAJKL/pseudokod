@@ -1,7 +1,9 @@
 <?php
 
-use Majkel\Pseudokod\{Lexer, Parser};
-use Majkel\Pseudokod\TokenStream;
+declare(strict_types=1);
+
+use Majkel\Pseudokod\Lexer;
+use Majkel\Pseudokod\Parser;
 
 include __DIR__.'/vendor/autoload.php';
 
@@ -34,7 +36,7 @@ $tokens = $lexer->lex('algorithm Parek(out:cs,rizek,in:parek) {
     }
     ++i
 }');
-//print_r($tokens);
+// print_r($tokens);
 $parser = new Parser($tokens);
-//print_r($parser->parseAlgorithm());
+// print_r($parser->parseAlgorithm());
 echo $parser->parseAlgorithm()->print();

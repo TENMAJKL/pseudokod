@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod\Nodes;
 
 class AlgorithmNode implements Node
@@ -10,10 +12,9 @@ class AlgorithmNode implements Node
         public readonly ?OutputNode $output,
         public readonly BlockNode $code
     ) {
-
     }
 
-    public function print(): string 
+    public function print(): string
     {
         return $this->code->print();
     }

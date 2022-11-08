@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod\Nodes;
 
 class ForNode implements Node
@@ -11,7 +13,6 @@ class ForNode implements Node
         public readonly EtaReductionNode $increment,
         public readonly BlockNode $block
     ) {
-
     }
 
     public function print(): string
@@ -19,7 +20,7 @@ class ForNode implements Node
         $variable = $this->variable->print();
         $from = $this->from->print();
         $to = $this->to->print();
-        $op = 
+        $op =
             ((int) $from < (int) $to)
             ? '<'
             : '>'

@@ -1,38 +1,65 @@
 <?php
 
-namespace Majkel\Pseudokod;
+declare(strict_types=1);
 
-use ParseError;
+namespace Majkel\Pseudokod;
 
 enum TokenKind
 {
     case Algorithm;
+
     case For;
+
     case Range;
+
     case Swap;
+
     case In;
+
     case Out;
+
     case If;
+
     case Else;
+
     case While;
+
     case Set;
+
     case Unary;
+
     case Math;
+
     case Logic;
+
     case Compare;
+
     case Colon;
+
     case Comma;
+
     case Semicolon;
+
     case NewLine;
+
     case Space;
+
     case Name;
+
     case Number;
+
     case Open;
+
     case Close;
+
     case CurlyOpen;
+
     case CurlyClose;
+
     case SquareOpen;
+
     case SquareClose;
+
     case Comment;
 
     public static function fromRe(string $re): self
@@ -66,10 +93,10 @@ enum TokenKind
             'SQUARE_OPEN' => self::SquareOpen,
             'SQUARE_CLOSE' => self::SquareClose,
             'COMMENT' => self::Comment,
-            'ERROR' => throw new ParseError('Unexpected token'),
+            'ERROR' => throw new \ParseError('Unexpected token'),
         };
     }
-    
+
     public function value(): string
     {
         return match ($this) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod\Nodes;
 
 class UnaryNode implements Node
@@ -8,7 +10,6 @@ class UnaryNode implements Node
         public readonly string $operation,
         public readonly VariableNode $variable
     ) {
-
     }
 
     public function print(): string

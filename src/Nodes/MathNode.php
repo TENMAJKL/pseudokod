@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Majkel\Pseudokod\Nodes;
 
 class MathNode implements ExpressionNode
@@ -9,12 +11,11 @@ class MathNode implements ExpressionNode
         public readonly string $operator,
         public readonly ExpressionNode $right
     ) {
-
     }
 
     public function print(int $level = 0): string
     {
-        return 
+        return
             $this->left->print()
             .' '.$this->operator
             .' '.$this->right->print()

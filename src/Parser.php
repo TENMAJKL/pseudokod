@@ -1,16 +1,14 @@
 <?php
 
-namespace Majkel\Pseudokod;
+declare(strict_types=1);
 
-use Majkel\Pseudokod\Nodes;
-use ParseError;
+namespace Majkel\Pseudokod;
 
 class Parser
 {
     public function __construct(
         public readonly TokenStream $tokens
     ) {
-
     }
 
     public function parseAlgorithm(): Nodes\AlgorithmNode
@@ -23,20 +21,20 @@ class Parser
 
         foreach ($expect as $token) {
             if ($token !== $this->tokens->next()->kind) {
-                throw new ParseError('Expected '.$token->value().', '.$this->tokens->curent()->kind->value().' given');
+                throw new \ParseError('Expected '.$token->value().', '.$this->tokens->curent()->kind->value().' given');
             }
         }
         $name = $this->tokens->curent();
         ['in' => $in, 'out' => $out] = $this->parseArguments();
-        
-        if ($this->tokens->nextNonWhite()->kind !== TokenKind::CurlyOpen) {
-            throw new ParseError('Expected {');
+
+        if (TokenKind::CurlyOpen !== $this->tokens->nextNonWhite()->kind) {
+            throw new \ParseError('Expected {');
         }
         $this->tokens->nextNonWhite();
         $code = $this->parseBlock();
 
         return new Nodes\AlgorithmNode(
-            $name->content, 
+            $name->content,
             $in ? new Nodes\InputNode($in) : null,
             $out ? new Nodes\OutputNode($out) : null,
             $code
@@ -48,8 +46,8 @@ class Parser
      */
     public function parseArguments(): array
     {
-        if ($this->tokens->nextNonWhite()->kind !== TokenKind::Open) {
-            throw new ParseError('Expected (, '.$this->tokens->curent()->kind->value().' given');
+        if (TokenKind::Open !== $this->tokens->nextNonWhite()->kind) {
+            throw new \ParseError('Expected (, '.$this->tokens->curent()->kind->value().' given');
         }
 
         $result = [
@@ -57,30 +55,37 @@ class Parser
             'out' => [],
         ];
         $mode = null;
-        while ($this->tokens->nextNonWhite()->kind !== TokenKind::Close) {
+        while (TokenKind::Close !== $this->tokens->nextNonWhite()->kind) {
             switch ($this->tokens->curent()->kind) {
                 case TokenKind::In:
                     $mode = 'in';
-                    if ($this->tokens->next()->kind !== TokenKind::Colon) {
-                        throw new ParseError('Expected :, '.$this->tokens->curent()->kind->value().'given');
+                    if (TokenKind::Colon !== $this->tokens->next()->kind) {
+                        throw new \ParseError('Expected :, '.$this->tokens->curent()->kind->value().'given');
                     }
+
                     break;
+
                 case TokenKind::Out:
                     $mode = 'out';
-                    if ($this->tokens->next()->kind !== TokenKind::Colon) {
-                        throw new ParseError('Expected :, '.$this->tokens->curent()->kind->value().'given');
+                    if (TokenKind::Colon !== $this->tokens->next()->kind) {
+                        throw new \ParseError('Expected :, '.$this->tokens->curent()->kind->value().'given');
                     }
+
                     break;
+
                 case TokenKind::Name:
                     if (!$mode) {
-                        throw new ParseError('Unexpected variable, its not clear if its input/output');
+                        throw new \ParseError('Unexpected variable, its not clear if its input/output');
                     }
                     $result[$mode][] = new Nodes\VariableNode($this->tokens->curent()->content);
+
                     break;
+
                 case TokenKind::Comma:
                     break;
+
                 default:
-                    throw new ParseError('Unexpected token');
+                    throw new \ParseError('Unexpected token');
             }
         }
 
@@ -89,7 +94,7 @@ class Parser
 
     public function parseStatement(): null|object
     {
-        return 
+        return
             $this->parseSet()
             ?? $this->parseSwap()
             ?? $this->parseIf()
@@ -103,10 +108,11 @@ class Parser
     public function parseBlock(): Nodes\BlockNode
     {
         $result = [];
-        while ($this->tokens->peekNonWhite()->kind !== TokenKind::CurlyClose) {
+        while (TokenKind::CurlyClose !== $this->tokens->peekNonWhite()->kind) {
             $result[] = $this->parseStatement();
         }
         $this->tokens->nextNonWhite();
+
         return new Nodes\BlockNode($result);
     }
 
@@ -118,7 +124,9 @@ class Parser
             switch ($this->tokens->curent()->kind) {
                 case TokenKind::Number:
                     $numbers->push(new Nodes\NumberNode($this->tokens->curent()->content));
+
                     break;
+
                 case TokenKind::Compare:
                 case TokenKind::Math:
                     $operator = $this->tokens->curent()->content;
@@ -132,44 +140,57 @@ class Parser
                         }
                     }
                     $operators->push($operator);
+
                     break;
+
                 case TokenKind::Open:
                     $operators->push('(');
+
                     break;
+
                 case TokenKind::Close:
                     $group = [];
                     while (($operator = $operators->pop()) !== '(') {
                         if (is_null($operator)) {
-                            throw new ParseError('Unexpected )');
+                            throw new \ParseError('Unexpected )');
                         }
 
-                        if ($operator === ',') {
+                        if (',' === $operator) {
                             $group[] = $numbers->pop();
+
                             continue;
                         }
                         self::infix($numbers, $operator, Nodes\MathNode::class);
                     }
                     $group[] = $numbers->pop();
-                    $numbers->push($numbers->top() instanceof Nodes\VariableNode
+                    $numbers->push(
+                        $numbers->top() instanceof Nodes\VariableNode
                         ? new Nodes\FunctionNode($numbers->pop()->name, array_reverse($group))
                         : $group[0]
                     );
+
                     break;
+
                 case TokenKind::Name:
                     $numbers->push($this->parseVariable());
+
                     break;
+
                 case TokenKind::Comma:
                     $operators->push(',');
+
                     break;
+
                 default:
                     print_r($this->tokens->curent());
-                    throw new ParseError('Unexpected token');
+
+                    throw new \ParseError('Unexpected token');
             }
         }
 
         while (($operator = $operators->pop()) !== null) {
             if (!in_array($operator, ['+', '-', '*', '/', '<', '>', '<=', '>=', '==', '!='])) {
-                throw new ParseError('Unexpected token');
+                throw new \ParseError('Unexpected token');
             }
             self::infix($numbers, $operator, Nodes\MathNode::class);
         }
@@ -179,13 +200,13 @@ class Parser
 
     public function parseVariable(): Nodes\VariableNode
     {
-        if ($this->tokens->curent()->kind !== TokenKind::Name) {
-            throw new ParseError('Expected variable');
+        if (TokenKind::Name !== $this->tokens->curent()->kind) {
+            throw new \ParseError('Expected variable');
         }
 
         $array_access = null;
         $name = $this->tokens->curent()->content;
-        if ($this->tokens->peekNonWhite()->kind === TokenKind::SquareOpen) {
+        if (TokenKind::SquareOpen === $this->tokens->peekNonWhite()->kind) {
             $this->tokens->nextNonWhite();
             $array_access = $this->parseExpression(TokenKind::SquareClose);
         }
@@ -195,51 +216,54 @@ class Parser
 
     public function parseSet(): null|Nodes\SetNode
     {
-        if ($this->tokens->peekNonWhite()->kind !== TokenKind::Name) {
+        if (TokenKind::Name !== $this->tokens->peekNonWhite()->kind) {
             return null;
         }
 
         $pointer = $this->tokens->pointer;
         $this->tokens->nextNonWhite();
         $variable = $this->parseVariable();
-        if ($this->tokens->peekNonWhite()->kind !== TokenKind::Set) {
+        if (TokenKind::Set !== $this->tokens->peekNonWhite()->kind) {
             $this->tokens->pointer = $pointer;
+
             return null;
         }
         $this->tokens->nextNonWhite();
         $expression = $this->parseExpression();
-    
+
         return new Nodes\SetNode($variable, $expression);
     }
 
     public function parseSwap(): null|Nodes\SwapNode
     {
-        if ($this->tokens->peekNonWhite()->kind !== TokenKind::Name) {
+        if (TokenKind::Name !== $this->tokens->peekNonWhite()->kind) {
             return null;
         }
-        
+
         $pointer = $this->tokens->pointer;
         $this->tokens->nextNonWhite();
         $variable = $this->parseVariable();
-        if ($this->tokens->peekNonWhite()->kind !== TokenKind::Swap) {
+        if (TokenKind::Swap !== $this->tokens->peekNonWhite()->kind) {
             $this->tokens->pointer = $pointer;
+
             return null;
         }
         $this->tokens->nextNonWhite(3);
-        $swap = $this->parseVariable(); 
+        $swap = $this->parseVariable();
         $this->tokens->nextNonWhite();
-        return new Nodes\SwapNode($variable, $swap);       
+
+        return new Nodes\SwapNode($variable, $swap);
     }
 
     public function parseIf($with_else = true): null|Nodes\IfNode
     {
-        if ($this->tokens->peekNonWhite()->kind !== TokenKind::If) {
+        if (TokenKind::If !== $this->tokens->peekNonWhite()->kind) {
             return null;
         }
 
         $this->tokens->nextNonWhite();
-        if ($this->tokens->nextNonWhite()->kind !== TokenKind::Open) {
-            throw new ParseError('Expected ( after if');
+        if (TokenKind::Open !== $this->tokens->nextNonWhite()->kind) {
+            throw new \ParseError('Expected ( after if');
         }
 
         $condition = $this->parseExpression(TokenKind::Close);
@@ -249,12 +273,12 @@ class Parser
         $else = null;
 
         if ($with_else) {
-            while ($this->tokens->curent()->kind == TokenKind::Else) {
+            while (TokenKind::Else == $this->tokens->curent()->kind) {
                 if ($else_if = $this->parseIf(false)) {
                     $else_ifs[] = $else_if;
                 } else {
                     if (!empty($else)) {
-                        throw new ParseError('If can have only 1 else');
+                        throw new \ParseError('If can have only 1 else');
                     }
                     $else = $this->parseBody();
                 }
@@ -266,13 +290,13 @@ class Parser
 
     public function parseWhile(): null|Nodes\WhileNode
     {
-        if ($this->tokens->peekNonWhite()->kind !== TokenKind::While) {
+        if (TokenKind::While !== $this->tokens->peekNonWhite()->kind) {
             return null;
         }
 
         $this->tokens->nextNonWhite();
-        if ($this->tokens->nextNonWhite()->kind !== TokenKind::Open) {
-            throw new ParseError('Expected ( after while');
+        if (TokenKind::Open !== $this->tokens->nextNonWhite()->kind) {
+            throw new \ParseError('Expected ( after while');
         }
 
         $condition = $this->parseExpression(TokenKind::Close);
@@ -283,7 +307,7 @@ class Parser
 
     public function parseFor(): null|Nodes\ForNode
     {
-        if ($this->tokens->peekNonWhite()->kind !== TokenKind::For) {
+        if (TokenKind::For !== $this->tokens->peekNonWhite()->kind) {
             return null;
         }
 
@@ -300,7 +324,7 @@ class Parser
 
         foreach ($expect as $token) {
             if ($token !== $this->tokens->nextNonWhite()->kind) {
-                throw new ParseError('Expected '.$token->value().', '.$this->tokens->curent()->kind->value().' given');
+                throw new \ParseError('Expected '.$token->value().', '.$this->tokens->curent()->kind->value().' given');
             }
             $tokens[] = $this->tokens->curent();
         }
@@ -308,20 +332,20 @@ class Parser
         $expression = $this->parseExpression(TokenKind::Comma);
 
         $operator = $this->tokens->nextNonWhite();
-        if ($operator->kind !== TokenKind::Math) {
-            throw new ParseError('Expected eta reduction');
+        if (TokenKind::Math !== $operator->kind) {
+            throw new \ParseError('Expected eta reduction');
         }
 
         $number = $this->tokens->nextNonWhite();
-        if ($number->kind === TokenKind::Number) {
-            if ($this->tokens->nextNonWhite() != TokenKind::Close) {
-                throw new ParseError('Expected )');
+        if (TokenKind::Number === $number->kind) {
+            if (TokenKind::Close != $this->tokens->nextNonWhite()) {
+                throw new \ParseError('Expected )');
             }
             $number = new Nodes\NumberNode($number->content);
-        } else if ($number->kind == TokenKind::Close) {
+        } elseif (TokenKind::Close == $number->kind) {
             $number = null;
         } else {
-            throw new ParseError('Expected )');
+            throw new \ParseError('Expected )');
         }
 
         $body = $this->parseBody();
@@ -338,51 +362,57 @@ class Parser
     public function parseUnary(): null|Nodes\UnaryNode
     {
         switch ($this->tokens->peekNonWhite()->kind) {
-        case TokenKind::Unary:
+            case TokenKind::Unary:
                 $op = $this->tokens->nextNonWhite()->content;
-                if (!(($var = $this->parseExpression()) instanceof Nodes\VariableNode)) {
-                    throw new ParseError('Expected variable after unary');
+                if (!($var = $this->parseExpression()) instanceof Nodes\VariableNode) {
+                    throw new \ParseError('Expected variable after unary');
                 }
+
                 return new Nodes\UnaryNode(
                     $op,
                     $var
                 );
+
                 break;
+
             case TokenKind::Name:
                 // TODO
                 return null;
+
             default:
                 return null;
         }
-    } 
+    }
 
     public function parseBody(): Nodes\BlockNode
     {
-        if ($this->tokens->peekNonWhite()->kind === TokenKind::CurlyOpen) {
+        if (TokenKind::CurlyOpen === $this->tokens->peekNonWhite()->kind) {
             $this->tokens->nextNonWhite();
-            if ($this->tokens->peekNonWhite()->kind === TokenKind::NewLine) {
+            if (TokenKind::NewLine === $this->tokens->peekNonWhite()->kind) {
                 $this->tokens->nextNonWhite();
             }
 
             $code = $this->parseBlock();
             $this->tokens->nextNonWhite();
+
             return $code;
         }
 
-        if ($this->tokens->peekNonWhite()->kind === TokenKind::NewLine) {
+        if (TokenKind::NewLine === $this->tokens->peekNonWhite()->kind) {
             $this->tokens->nextNonWhite();
         }
+
         return new Nodes\BlockNode([$this->parseStatement()]);
     }
 
     private static function infix(Stack $stack, string $operator, string $class): void
     {
-        $second = $stack->pop() ?? throw new ParseError('Unexpected '.$operator);
-        $first = $stack->pop() ?? throw new ParseError('Unexpected '.$operator);
+        $second = $stack->pop() ?? throw new \ParseError('Unexpected '.$operator);
+        $first = $stack->pop() ?? throw new \ParseError('Unexpected '.$operator);
         $stack->push(new $class(
             $first,
             $operator,
             $second,
-        ));       
+        ));
     }
 }
