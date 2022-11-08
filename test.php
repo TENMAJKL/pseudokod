@@ -27,6 +27,10 @@ $tokens = $lexer->lex('algorithm Parek(out:cs,rizek,in:parek) {
         }
     }
     1+3 
+    for (i: 1 -> 10, +) {
+        1 + 1
+    }
+    ++i
 }');
 //print_r($tokens);
 $parser = new Parser($tokens);

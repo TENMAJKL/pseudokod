@@ -94,11 +94,17 @@ class Parser
             $this->parseSet()
             ?? $this->parseSwap()
             ?? $this->parseIf()
+            ?? $this->parseWhile()
+            ?? $this->parseFor()
+            ?? $this->parseUnary()
             ?? $this->parseExpression()
         ;
     }
 
-    public function parseBlock()
+    /**
+     * @return array<object>
+     */
+    public function parseBlock(): array
     {
         $result = [];
         while ($this->tokens->peekNonWhite()->kind !== TokenKind::CurlyClose) {
@@ -277,6 +283,84 @@ class Parser
         return new Nodes\WhileNode($condition, $code);
     }
 
+    public function parseFor(): null|Nodes\ForNode
+    {
+        if ($this->tokens->peekNonWhite()->kind !== TokenKind::For) {
+            return null;
+        }
+
+        static $expect = [
+            TokenKind::For,
+            TokenKind::Open,
+            TokenKind::Name,
+            TokenKind::Colon,
+            TokenKind::Number,
+            TokenKind::Range,
+        ];
+
+        $tokens = [];
+
+        foreach ($expect as $token) {
+            if ($token !== $this->tokens->nextNonWhite()->kind) {
+                throw new ParseError('Expected '.$token->value().', '.$this->tokens->curent()->kind->value().' given');
+            }
+            $tokens[] = $this->tokens->curent();
+        }
+
+        $expression = $this->parseExpression(TokenKind::Comma);
+
+        $operator = $this->tokens->nextNonWhite();
+        if ($operator->kind !== TokenKind::Math) {
+            throw new ParseError('Expected eta reduction');
+        }
+
+        $number = $this->tokens->nextNonWhite();
+        if ($number->kind === TokenKind::Number) {
+            if ($this->tokens->nextNonWhite() != TokenKind::Close) {
+                throw new ParseError('Expected )');
+            }
+            $number = new Nodes\NumberNode($number->content);
+        } else if ($number->kind == TokenKind::Close) {
+            $number = null;
+        } else {
+            throw new ParseError('Expected )');
+        }
+
+        $body = $this->parseBody();
+
+        return new Nodes\ForNode(
+            new Nodes\VariableNode($tokens[2]->content),
+            new Nodes\NumberNode($tokens[4]->content),
+            $expression,
+            new Nodes\EtaReductionNode($operator->content, $number),
+            $body
+        );
+    }
+
+    public function parseUnary(): null|Nodes\UnaryNode
+    {
+        switch ($this->tokens->peekNonWhite()->kind) {
+        case TokenKind::Unary:
+                $op = $this->tokens->nextNonWhite()->content;
+                if (!(($var = $this->parseExpression()) instanceof VariableNode)) {
+                    throw new ParseError('Expected variable after unary');
+                }
+                return new Nodes\UnaryNode(
+                    $op,
+                    $var
+                );
+                break;
+            case TokenKind::Name:
+                // TODO
+                return null;
+            default:
+                return null;
+        }
+    } 
+
+    /**
+     * @return array<object>
+     */
     public function parseBody(): array
     {
         if ($this->tokens->peekNonWhite()->kind === TokenKind::CurlyOpen) {

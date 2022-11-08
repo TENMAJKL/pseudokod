@@ -2,6 +2,6 @@
 
 namespace Majkel\Pseudokod\Nodes;
 
-interface ExpressionNode
+interface ExpressionNode extends Node
 {
 }
