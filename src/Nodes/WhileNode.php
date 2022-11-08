@@ -6,8 +6,13 @@ class WhileNode
 {
     public function __construct(
         public readonly ExpressionNode $condition,
-        public readonly array $block,
+        public readonly BlockNode $block,
     ) {
 
+    }
+
+    public function print(): string
+    {
+        return "while ({$this->condition->print()}) {$this->block->print()}";
     }
 }

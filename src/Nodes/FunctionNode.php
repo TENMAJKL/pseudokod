@@ -10,4 +10,10 @@ class FunctionNode implements ExpressionNode
     ) {
 
     }
+
+    public function print(): string
+    {
+        $args = implode(", ", array_map(fn(Node $item) => $item->print(), $this->arguments));
+        return $this->name.'('.$args.')';
+    }
 }

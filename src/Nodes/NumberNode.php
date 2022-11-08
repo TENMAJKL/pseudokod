@@ -9,4 +9,9 @@ class NumberNode implements ExpressionNode
     ) {
 
     }
+
+    public function print(): string
+    {
+        return $this->value;
+    }
 }

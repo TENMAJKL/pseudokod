@@ -10,4 +10,13 @@ class EtaReductionNode
     ) {
 
     }
+
+    public function print(): string
+    {
+        if (!$this->number) {
+            return $this->operator.$this->operator;
+        }
+
+        return $this->operator.'= '.$this->number->print();
+    }
 }

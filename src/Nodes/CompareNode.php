@@ -11,4 +11,13 @@ class CompareNode implements ExpressionNode
     ) {
 
     }
+
+    public function print(): string
+    {
+        return 
+            $this->left->print()
+            .' '.$this->operator
+            .' '.$this->right->print()
+        ;
+    }
 }

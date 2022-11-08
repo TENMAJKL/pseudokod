@@ -11,4 +11,13 @@ class MathNode implements ExpressionNode
     ) {
 
     }
+
+    public function print(int $level = 0): string
+    {
+        return 
+            $this->left->print()
+            .' '.$this->operator
+            .' '.$this->right->print()
+        ;
+    }
 }

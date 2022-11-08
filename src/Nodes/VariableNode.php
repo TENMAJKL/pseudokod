@@ -10,4 +10,14 @@ class VariableNode implements ExpressionNode
     ) {
 
     }
+
+    public function print(): string
+    {
+        $array_access = 
+            $this->array_access 
+            ? '['.$this->array_access->print().']'
+            : ''
+        ;
+        return $this->name.$array_access;
+    }
 }

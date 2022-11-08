@@ -22,6 +22,8 @@ $tokens = $lexer->lex('algorithm Parek(out:cs,rizek,in:parek) {
             1 * 1
         } else if (1 == 2) {
             18*2
+        } else if (1 + 1) {
+            1 + 2
         } else {
             1 /8
         }
@@ -34,4 +36,5 @@ $tokens = $lexer->lex('algorithm Parek(out:cs,rizek,in:parek) {
 }');
 //print_r($tokens);
 $parser = new Parser($tokens);
-print_r($parser->parseAlgorithm());
+//print_r($parser->parseAlgorithm());
+echo $parser->parseAlgorithm()->print();
