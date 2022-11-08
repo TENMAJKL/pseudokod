@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Majkel\Pseudokod\Nodes;
 
 use Majkel\Pseudokod\Indentor;
+use Majkel\Pseudokod\VariableManager;
 
 class BlockNode implements Node
 {
@@ -14,11 +15,11 @@ class BlockNode implements Node
     ) {
     }
 
-    public function print(int $level = 0): string
+    public function print(VariableManager $variables, int $level = 0): string
     {
-        return 
+        return
             "{\n"
-            .implode("\n", array_map(fn (Node $item) => $item->print($level + 1), $this->code))
+            .implode("\n", array_map(fn (Node $item) => $item->print($variables, $level + 1), $this->code))
             ."\n"
             .Indentor::indent('}', $level);
     }

@@ -9,14 +9,14 @@ class Lexer
     public const Re = '
         (?<ALGORITHM>algorithm)
         |(?<FOR>for)
-        |(?<RANGE>->)
-        |(?<SWAP><->)
+        |(?<RANGE>⇝)
+        |(?<SWAP>↔)
         |(?<IN>in)
         |(?<OUT>out)
         |(?<IF>if)
         |(?<ELSE>else)
         |(?<WHILE>while)
-        |(?<SET><-)
+        |(?<SET>←)
         |(?<UNARY>(\+\+|--))
         |(?<COMMENT>//[^\n]+)
         |(?<MATH>(\+|-|\*|/|%))
@@ -44,8 +44,9 @@ class Lexer
         $line = 0;
 
         return new TokenStream(array_map(function ($token) use (&$line) {
-            $token = array_filter($token);
+            $token = array_filter($token, fn ($item) => null !== $item);
             $keys = array_keys($token);
+
             $result = new Token(TokenKind::fromRe($keys[1]), $token[0], $line);
             if ('NEWLINE' === $keys[1]) {
                 ++$line;

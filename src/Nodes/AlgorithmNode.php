@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Majkel\Pseudokod\Nodes;
 
+use Majkel\Pseudokod\VariableManager;
+
 class AlgorithmNode implements Node
 {
     public function __construct(
@@ -14,8 +16,8 @@ class AlgorithmNode implements Node
     ) {
     }
 
-    public function print(int $level = 0): string
+    public function print(VariableManager $variables, int $level = 0): string
     {
-        return 'void '.$this->name.'('.$this->input->print().")\n".$this->code->print();
+        return 'void '.$this->name.'('.$this->input->print($variables).")\n".$this->code->print($variables);
     }
 }

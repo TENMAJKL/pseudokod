@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Majkel\Pseudokod\Nodes;
 
+use Majkel\Pseudokod\VariableManager;
+
 class InputNode implements Node
 {
     public function __construct(
@@ -12,18 +14,18 @@ class InputNode implements Node
     ) {
     }
 
-    public function print(int $level = 0): string
+    public function print(VariableManager $variables, int $level = 0): string
     {
-        $variables = [];
+        $result = [];
         foreach ($this->variables as $var) {
-            $var = $var->print();
-            $variables[] = 
-                $var === 'pole'
+            $var = $var->print($variables);
+            $result[] =
+                'pole' === $var
                 ? 'int pole[]'
                 : 'int '.$var
             ;
         }
 
-        return implode(', ', $variables);
+        return implode(', ', $result);
     }
 }

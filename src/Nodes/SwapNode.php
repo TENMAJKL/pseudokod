@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Majkel\Pseudokod\Nodes;
 
 use Majkel\Pseudokod\Indentor;
+use Majkel\Pseudokod\VariableManager;
 
 class SwapNode implements Node
 {
@@ -14,12 +15,12 @@ class SwapNode implements Node
     ) {
     }
 
-    public function print(int $level = 0): string
+    public function print(VariableManager $variables, int $level = 0): string
     {
-        $first = $this->first->print();
-        $second = $this->second->print();
+        $first = $this->first->print($variables);
+        $second = $this->second->print($variables);
 
-        return 
+        return
             Indentor::indent("int __h = {$first};\n", $level)
             .Indentor::indent("{$first} = {$second};\n", $level)
             .Indentor::indent("{$second} = __h;", $level)

@@ -102,10 +102,10 @@ class Parser
             ?? $this->parseFor()
             ?? $this->parseUnary()
             ?? (
-                ($ex = $this->parseExpression()) 
+                ($ex = $this->parseExpression())
                 ? new Nodes\StatementExpressionNode($ex)
                 : new Nodes\NewLineNode()
-            ) 
+            )
         ;
     }
 
@@ -124,13 +124,15 @@ class Parser
     {
         $numbers = new Stack();
         $operators = new Stack();
-        while ($this->tokens->nextNonWhite()->kind !== $end) {
+        $brackets = 0;
+        while ($this->tokens->nextNonWhite()->kind !== $end || $brackets > 0) {
             switch ($this->tokens->curent()->kind) {
                 case TokenKind::Number:
                     $numbers->push(new Nodes\NumberNode($this->tokens->curent()->content));
 
                     break;
 
+                case TokenKind::Logic:
                 case TokenKind::Compare:
                 case TokenKind::Math:
                     $operator = $this->tokens->curent()->content;
@@ -138,7 +140,7 @@ class Parser
                         self::infix($numbers, $operator, Nodes\MathNode::class);
                     }
                     // at this point, I have no idea whats going on
-                    if (in_array($operator, ['<', '>', '<=', '>=', '==', '!='])) {
+                    if (in_array($operator, ['<', '>', '<=', '>=', '==', '!=', 'AND', 'OR'])) {
                         if (in_array($operators->top(), ['/', '*', '+', '-'])) {
                             self::infix($numbers, $operators->pop(), Nodes\CompareNode::class);
                         }
@@ -149,6 +151,7 @@ class Parser
 
                 case TokenKind::Open:
                     $operators->push('(');
+                    ++$brackets;
 
                     break;
 
@@ -166,6 +169,7 @@ class Parser
                         }
                         self::infix($numbers, $operator, Nodes\MathNode::class);
                     }
+                    --$brackets;
                     $group[] = $numbers->pop();
                     $numbers->push(
                         $numbers->top() instanceof Nodes\VariableNode
@@ -193,7 +197,9 @@ class Parser
         }
 
         while (($operator = $operators->pop()) !== null) {
-            if (!in_array($operator, ['+', '-', '*', '/', '<', '>', '<=', '>=', '==', '!='])) {
+            if (!in_array($operator, ['+', '-', '*', '/', '<', '>', '<=', '>=', '==', '!=', 'AND', 'OR'])) {
+                print_r($this->tokens->curent());
+
                 throw new \ParseError('Unexpected token');
             }
             self::infix($numbers, $operator, Nodes\MathNode::class);

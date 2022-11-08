@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Majkel\Pseudokod\Nodes;
 
 use Majkel\Pseudokod\Indentor;
+use Majkel\Pseudokod\VariableManager;
 
-class WhileNode
+class WhileNode implements Node
 {
     public function __construct(
         public readonly ExpressionNode $condition,
@@ -14,10 +15,10 @@ class WhileNode
     ) {
     }
 
-    public function print(int $level = 0): string
+    public function print(VariableManager $variables, int $level = 0): string
     {
         return Indentor::indent(
-            "while ({$this->condition->print()}) {$this->block->print($level)}", 
+            "while ({$this->condition->print($variables)}) {$this->block->print($variables, $level)}",
             $level
         );
     }
