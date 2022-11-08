@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Majkel\Pseudokod\Nodes;
 
+use Majkel\Pseudokod\Indentor;
+
 class WhileNode
 {
     public function __construct(
@@ -12,8 +14,11 @@ class WhileNode
     ) {
     }
 
-    public function print(): string
+    public function print(int $level = 0): string
     {
-        return "while ({$this->condition->print()}) {$this->block->print()}";
+        return Indentor::indent(
+            "while ({$this->condition->print()}) {$this->block->print($level)}", 
+            $level
+        );
     }
 }

@@ -34,6 +34,7 @@ $tokens = $lexer->lex('algorithm Parek(out:cs,rizek,in:parek) {
     for (i: 1 -> 10, +) {
         1 + 1
     }
+
     ++i
 }');
 // print_r($tokens);

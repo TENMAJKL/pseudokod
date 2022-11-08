@@ -13,7 +13,7 @@ class CompareNode implements ExpressionNode
     ) {
     }
 
-    public function print(): string
+    public function print(int $level = 0): string
     {
         return
             $this->left->print()

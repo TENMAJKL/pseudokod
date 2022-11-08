@@ -12,7 +12,7 @@ class FunctionNode implements ExpressionNode
     ) {
     }
 
-    public function print(): string
+    public function print(int $level = 0): string
     {
         $args = implode(', ', array_map(fn (Node $item) => $item->print(), $this->arguments));
 

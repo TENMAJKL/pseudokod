@@ -101,7 +101,11 @@ class Parser
             ?? $this->parseWhile()
             ?? $this->parseFor()
             ?? $this->parseUnary()
-            ?? new Nodes\StatementExpressionNode($this->parseExpression())
+            ?? (
+                ($ex = $this->parseExpression()) 
+                ? new Nodes\StatementExpressionNode($ex)
+                : new Nodes\NewLineNode()
+            ) 
         ;
     }
 

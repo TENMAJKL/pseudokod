@@ -14,8 +14,8 @@ class AlgorithmNode implements Node
     ) {
     }
 
-    public function print(): string
+    public function print(int $level = 0): string
     {
-        return $this->code->print();
+        return 'void '.$this->name.'('.$this->input->print().")\n".$this->code->print();
     }
 }

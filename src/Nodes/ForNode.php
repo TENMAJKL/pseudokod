@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Majkel\Pseudokod\Nodes;
 
+use Majkel\Pseudokod\Indentor;
+
 class ForNode implements Node
 {
     public function __construct(
@@ -15,7 +17,7 @@ class ForNode implements Node
     ) {
     }
 
-    public function print(): string
+    public function print(int $level = 0): string
     {
         $variable = $this->variable->print();
         $from = $this->from->print();
@@ -25,7 +27,10 @@ class ForNode implements Node
             ? '<'
             : '>'
         ;
-
-        return "for (int {$variable} = {$this->from->print()}; {$variable} {$op} {$this->to->print()}; {$variable}{$this->increment->print()}) {$this->block->print()}";
+        
+        return Indentor::indent(
+            "for (int {$variable} = {$this->from->print()}; {$variable} {$op} {$this->to->print()}; {$variable}{$this->increment->print()}) {$this->block->print($level)}",
+            $level
+        );
     }
 }

@@ -12,7 +12,7 @@ class EtaReductionNode
     ) {
     }
 
-    public function print(): string
+    public function print(int $level = 0): string
     {
         if (!$this->number) {
             return $this->operator.$this->operator;

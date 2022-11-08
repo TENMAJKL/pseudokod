@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Majkel\Pseudokod\Nodes;
 
+use Majkel\Pseudokod\Indentor;
+
 class IfNode implements Node
 {
     public function __construct(
@@ -15,17 +17,16 @@ class IfNode implements Node
     ) {
     }
 
-    public function print(): string
+    public function print(int $level = 0): string
     {
-        // TODO if
-        $result = "if ({$this->condition->print()}) {$this->block->print()}";
+        $result = Indentor::indent("if ({$this->condition->print()}) {$this->block->print($level)}", $level);
 
         foreach ($this->else_ifs as $else_if) {
-            $result .= ' else '.$else_if->print();
+            $result .= ' else '.$else_if->print($level);
         }
 
         if ($this->else) {
-            $result .= ' else '.$this->else->print();
+            $result .= ' else '.$this->else->print($level);
         }
 
         return $result;

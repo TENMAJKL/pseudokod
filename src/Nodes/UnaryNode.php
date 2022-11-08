@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Majkel\Pseudokod\Nodes;
 
+use Majkel\Pseudokod\Indentor;
+
 class UnaryNode implements Node
 {
     public function __construct(
@@ -12,8 +14,8 @@ class UnaryNode implements Node
     ) {
     }
 
-    public function print(): string
+    public function print(int $level = 0): string
     {
-        return $this->operation.$this->variable->print().';';
+        return Indentor::indent($this->operation.$this->variable->print().';', $level);
     }
 }

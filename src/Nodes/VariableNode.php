@@ -12,7 +12,7 @@ class VariableNode implements ExpressionNode
     ) {
     }
 
-    public function print(): string
+    public function print(int $level = 0): string
     {
         $array_access =
             $this->array_access
