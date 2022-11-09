@@ -139,7 +139,7 @@ class Parser
                     if (in_array($operators->top(), ['/', '*'])) {
                         self::infix($numbers, $operator, Nodes\MathNode::class);
                     }
-                    // at this point, I have no idea whats going on
+                    // at this point, I have no idea whats going on but it works
                     if (in_array($operator, ['<', '>', '<=', '>=', '==', '!=', 'AND', 'OR'])) {
                         if (in_array($operators->top(), ['/', '*', '+', '-'])) {
                             self::infix($numbers, $operators->pop(), Nodes\CompareNode::class);
