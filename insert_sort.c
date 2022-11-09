@@ -1,6 +1,6 @@
-void InsertSort(int int pole, int int n)
+void InsertSort(int pole[], int n)
 {
-    for (int int d = 1; int d > n - 1; int d++) {
+    for (int d = 1; d <= n - 1; d++) {
         int vkladany = pole[d];
         int i = d;
         while (i > 0 && pole[i - 1] > vkladany) {

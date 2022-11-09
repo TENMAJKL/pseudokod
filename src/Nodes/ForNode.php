@@ -20,13 +20,14 @@ class ForNode implements Node
 
     public function print(VariableManager $variables, int $level = 0): string
     {
-        $variable = $this->variable->print($variables);
+        $variable = $this->variable->name;
+        $variables->add($variable);
         $from = $this->from->print($variables);
         $to = $this->to->print($variables);
         $op =
             ((int) $from < (int) $to)
-            ? '<'
-            : '>'
+            ? '>='
+            : '<='
         ;
 
         return Indentor::indent(

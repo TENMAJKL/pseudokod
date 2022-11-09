@@ -18,12 +18,13 @@ class InputNode implements Node
     {
         $result = [];
         foreach ($this->variables as $var) {
-            $var = $var->print($variables);
+            $var = $var->name;
             $result[] =
                 'pole' === $var
                 ? 'int pole[]'
                 : 'int '.$var
             ;
+            $variables->add($var);
         }
 
         return implode(', ', $result);
